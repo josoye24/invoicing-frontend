@@ -41,6 +41,8 @@ export default function Home() {
       try {
         setLoading(true);
         const response = await api.signIn(values);
+        const message = response.data.message
+        
         console.log(response);
         if (response.data.isSuccessful) {
           const userData = response.data.data.user;
@@ -48,9 +50,9 @@ export default function Home() {
           localStorage.setItem("user", JSON.stringify(userData));
           localStorage.setItem("token", token);
           args.resetForm();
-          toast.success("Login Successfully");
+          toast.success(message);
           router.push('/invoice')
-        } else toast.error("Incorrect Credentials");
+        } else toast.error(message);
       } catch (error: any) {
         setLoading(false);
         console.log(error);

@@ -36,14 +36,16 @@ const endpoints = {
 
       return axios({ method, url });
     },
+  
+    // create invoice endpoing
+    createInvoice: (payload: any) => {
+      const method = "post";
+      const url = baseURL + "/invoice/create";
+  
+      return axios({ method, url, data: payload });
+    },
 
-  // get Details endpoint
-  //   getUerDetails: (payload: string) => {
-  //     const method = "get";
-  //     const url = baseURL + "/eefab29f-f880-43cb-9d0d-9d3f74d8bb8b/" + payload;
 
-  //     return axios({ method, url });
-  //   },
 };
 
 export default endpoints;
