@@ -16,21 +16,20 @@ import {
   TableRow,
 } from "@mui/material";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import api from "../../api/api";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import api from "../../api/api";
 
 import AddIcon from "@mui/icons-material/Add";
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
 const validationSchema = yup.object({
   customerName: yup.string().required("Customer Name is required"),
-    customerAddress: yup.string().required("Customer Address is required")
+  customerAddress: yup.string().required("Customer Address is required"),
 });
-
 
 type Product = {
   productCode: string;
@@ -48,7 +47,7 @@ const initialProduct: Product = {
   amount: 0,
 };
 
-export default function CreateInvoicePage() {
+const CreateInvoicePage = () => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -74,45 +73,48 @@ export default function CreateInvoicePage() {
 
     if (typeof currentItem[field] === "string" && typeof value === "string") {
       currentItem[field] = value;
-    } else if (typeof currentItem[field] === "number" && typeof value === "number") {
+    } else if (
+      typeof currentItem[field] === "number" &&
+      typeof value === "number"
+    ) {
       currentItem[field] = value;
-      currentItem.amount = currentItem.productQuantity * currentItem.productPricePerUnit;
+      currentItem.amount =
+        currentItem.productQuantity * currentItem.productPricePerUnit;
     }
 
     updatedItems[index] = currentItem;
     setInvoiceItems(updatedItems);
   };
-  
+
   const calculateSubtotal = (): number => {
     return invoiceItems.reduce((subtotal, item) => subtotal + item.amount, 0);
   };
 
   const formik = useFormik({
     initialValues: {
-      email: "",
-      password: "",
+      customerName: "",
+      customerAddress: "",
     },
     validationSchema: validationSchema,
     onSubmit: async (values, args) => {
       try {
         setLoading(true);
         const paylaod = {
-            ...values,
-            userId: "7d49f065-40f0-4f88-920b-2fed7965be23",
-            details: invoiceItems
-          }
+          ...values,
+          userId: "7d49f065-40f0-4f88-920b-2fed7965be23",
+          details: invoiceItems,
+        };
 
         const response = await api.createInvoice(paylaod);
         console.log(response);
-        const message = response.data.message
+        const message = response.data.message;
         if (response.data.isSuccessful) {
-          args.resetForm();
-          toast.success(message);
           router.push("/invoice");
+          toast.success(message);
+          args.resetForm();
         } else toast.error(message);
       } catch (error: any) {
         setLoading(false);
-        console.log(error);
         if (error.response) {
           toast.error(error.response.data.message);
         } else {
@@ -192,45 +194,42 @@ export default function CreateInvoicePage() {
             Invoice Details
           </Typography>
 
-<Box
-sx={{
-  display: "flex",
-  justifyContent: 'flex-end'
-}}
->
-
-          <Button variant="outlined" 
-          onClick={handleAddItem}
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                }}
-          >
-            <Typography
-            component="p"
-            fontWeight={500}
-            color="primary.main"
-            sx={{ fontSize: "12px" }}
-          >
-            Add Item 
-          </Typography>
-            <AddIcon fontSize='small' /> 
-          </Button>
-</Box>
-
-
-          
-
-          <TableContainer component={Paper}
+          <Box
             sx={{
-                  backgroundColor: "transparent",
-                  }}
-                  elevation={0}
-          
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
           >
-            <Table >
+            <Button
+              variant="outlined"
+              onClick={handleAddItem}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                component="p"
+                fontWeight={500}
+                color="primary.main"
+                sx={{ fontSize: "12px" }}
+              >
+                Add Item
+              </Typography>
+              <AddIcon fontSize="small" />
+            </Button>
+          </Box>
+
+          <TableContainer
+            component={Paper}
+            sx={{
+              backgroundColor: "transparent",
+            }}
+            elevation={0}
+          >
+            <Table>
               <TableHead>
-                <TableRow >
+                <TableRow>
                   <TableCell width="25%">Code</TableCell>
                   <TableCell width="25%">Description</TableCell>
                   <TableCell width="15%">Quantity</TableCell>
@@ -244,8 +243,8 @@ sx={{
                   <TableRow key={index}>
                     <TableCell>
                       <TextField
-            size="small"
-                        value={item.name}
+                        size="small"
+                        value={item.productCode}
                         onChange={(e) =>
                           handleItemChange(index, "productCode", e.target.value)
                         }
@@ -253,81 +252,78 @@ sx={{
                     </TableCell>
                     <TableCell>
                       <TextField
-            size="small"
-
-                        value={item.description}
+                        size="small"
+                        value={item.productDescription}
                         onChange={(e) =>
-                          handleItemChange(index, "productDescription", e.target.value)
+                          handleItemChange(
+                            index,
+                            "productDescription",
+                            e.target.value
+                          )
                         }
                       />
                     </TableCell>
                     <TableCell>
                       <TextField
-            size="small"
+                        size="small"
                         type="number"
-                        value={item.quantity}
+                        value={item.productQuantity}
                         onChange={(e) =>
-                          handleItemChange(index, "productQuantity", +e.target.value)
+                          handleItemChange(
+                            index,
+                            "productQuantity",
+                            +e.target.value
+                          )
                         }
                       />
                     </TableCell>
                     <TableCell>
                       <TextField
-            size="small"
+                        size="small"
                         type="number"
-                        value={item.unitPrice}
+                        value={item.productPricePerUnit}
                         onChange={(e) =>
-                          handleItemChange(index, "productPricePerUnit", +e.target.value)
+                          handleItemChange(
+                            index,
+                            "productPricePerUnit",
+                            +e.target.value
+                          )
                         }
                       />
                     </TableCell>
-                    <TableCell align="right">{item.amount.toLocaleString()}</TableCell>
+                    <TableCell align="right">
+                      {item.amount.toLocaleString()}
+                    </TableCell>
                     <TableCell>
-                      {invoiceItems.length > 1 ? (<IconButton onClick={() => handleRemoveItem(index)}>
-                        <HighlightOffIcon style={{ color: 'red' }} />
-                      </IconButton>) : null}
-                      
+                      {invoiceItems.length > 1 ? (
+                        <IconButton onClick={() => handleRemoveItem(index)}>
+                          <HighlightOffIcon style={{ color: "red" }} />
+                        </IconButton>
+                      ) : null}
                     </TableCell>
                   </TableRow>
                 ))}
-                 <TableRow>
-                    <TableCell rowSpan={2} />
-                    <TableCell colSpan={2} >
-                    <Typography 
-          fontWeight={500}
-                    
-                    >
-                      Subtotal
-                      </Typography>
-                      </TableCell>
-                    <TableCell colSpan={2} align="right">
-                    <Typography 
-          fontWeight={500}
-                    
-                    >
+                <TableRow>
+                  <TableCell rowSpan={2} />
+                  <TableCell colSpan={2}>
+                    <Typography fontWeight={500}>Subtotal</Typography>
+                  </TableCell>
+                  <TableCell colSpan={2} align="right">
+                    <Typography fontWeight={500}>
                       $ {calculateSubtotal().toLocaleString()}
-                      </Typography>
-                      </TableCell>
-            </TableRow>
-          <TableRow>
-            <TableCell colSpan={2}>
-              
-            <Typography 
-          fontWeight={500}
-                    
-                    >
-                      Total
-                      </Typography>
-            </TableCell>
-            <TableCell colSpan={2} align="right">
-            <Typography 
-          fontWeight={500}
-                    
-                    >
-                     $ {calculateSubtotal().toLocaleString()}
-                      </Typography>
-              </TableCell>
-          </TableRow>
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell colSpan={2}>
+                    <Typography fontWeight={500}>Total</Typography>
+                  </TableCell>
+                  <TableCell colSpan={2} align="right">
+                    <Typography fontWeight={500}>
+                      $ {calculateSubtotal().toLocaleString()}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </TableContainer>
@@ -357,4 +353,5 @@ sx={{
       </Box>
     </Box>
   );
-}
+};
+export default CreateInvoicePage;

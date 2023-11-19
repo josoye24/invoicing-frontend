@@ -9,50 +9,45 @@ import {
   InputAdornment,
   CircularProgress,
 } from "@mui/material";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { useRouter } from 'next/navigation'
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 import * as yup from "yup";
-import api from "./api/api";
+import api from "../api/api";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 
 const validationSchema = yup.object({
+  name: yup.string().required("Name is required"),
   email: yup
     .string()
     .email("Must be a valid email format")
     .required("Email is required"),
-  password: yup
-    .string()
-    .required("Password is required")
-    .min(6, "Password must be at least 6 characters"),
+  password: yup.string().required("Password is required").min(6, "Password must be at least 6 characters")
 });
 
-const Home = () => {
-  const router = useRouter();
+const SignupPage = () => {
+  const router = useRouter()
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const formik = useFormik({
     initialValues: {
-      email: "",
+        name: "",
+        email: "",
       password: "",
     },
     validationSchema: validationSchema,
     onSubmit: async (values, args) => {
       try {
         setLoading(true);
-        const response = await api.signIn(values);
-        const message = response.data.message;
-
+        const response = await api.signUp(values);
+        const message = response.data.message
+        
         console.log(response);
         if (response.data.isSuccessful) {
-          const userData = response.data.data.user;
-          const token = response.data.data.token;
-          localStorage.setItem("user", JSON.stringify(userData));
-          localStorage.setItem("token", token);
-          router.push("/invoice");
+          router.push('/')
           toast.success(message);
           args.resetForm();
         } else toast.error(message);
@@ -60,9 +55,9 @@ const Home = () => {
         setLoading(false);
         console.log(error);
         if (error.response) {
-          toast.error(error.response.data.message);
+        toast.error(error.response.data.message);
         } else {
-          toast.error("Something went wrong, please try again");
+        toast.error("Something went wrong, please try again");
         }
       }
     },
@@ -91,15 +86,9 @@ const Home = () => {
         <Typography
           variant="h4"
           align="center"
-          sx={{ color: "primary.dark", fontWeight: "700" }}
+          sx={{ color: "primary.dark", fontWeight: "700", mb: 5 }}
         >
-          Welcome!
-        </Typography>
-        <Typography
-          align="center"
-          sx={{ color: "text.secondary", fontSize: "14px", mt: 2, mb: 5 }}
-        >
-          Enter details to login.
+          Create an Account
         </Typography>
 
         <Box
@@ -113,12 +102,30 @@ const Home = () => {
         >
           <TextField
             fullWidth
+            id="name"
+            name="name"
+            value={formik.values.name}
+            label="Name"
+            size="small"
+            variant="outlined"
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+          />
+          <Typography color="error.main" sx={{ fontSize: "13px" }}>
+            {formik.errors.name && formik.touched.name ? (
+              <span>{formik.errors.name}</span>
+            ) : null}
+          </Typography>
+          
+          <TextField
+            fullWidth
             id="email"
             name="email"
             value={formik.values.email}
             label="Email"
             size="small"
             variant="outlined"
+            sx={{ mt: "25px" }}
             onBlur={formik.handleBlur}
             onChange={formik.handleChange}
           />
@@ -158,7 +165,7 @@ const Home = () => {
               ),
             }}
           />
-          <Typography color="error.main" sx={{ fontSize: "13px" }}>
+           <Typography color="error.main" sx={{ fontSize: "13px" }}>
             {formik.errors.password && formik.touched.password ? (
               <span>{formik.errors.password}</span>
             ) : null}
@@ -181,23 +188,13 @@ const Home = () => {
                   fontWeight: "500",
                 }}
               >
-                LOG IN
+                REGISTER
               </Typography>
             )}
           </Button>
         </Box>
-        <Typography
-          onClick={() => {
-            router.push("/signup");
-          }}
-          align="right"
-          fontWeight={500}
-          sx={{ color: "text.secondary", fontSize: "15px", cursor: "pointer" }}
-        >
-          Dont have an Account? SignUp
-        </Typography>
       </Box>
     </Box>
   );
-};
-export default Home;
+}
+export default SignupPage;

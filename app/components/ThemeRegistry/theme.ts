@@ -1,18 +1,18 @@
-import { Roboto } from 'next/font/google';
-import { createTheme } from '@mui/material/styles';
+import { Roboto } from "next/font/google";
+import { createTheme } from "@mui/material/styles";
 import { colors } from "@mui/material";
 
 const white = "#fff";
 
 const roboto = Roboto({
-  weight: ['300', '400', '500', '700'],
-  subsets: ['latin'],
-  display: 'swap',
+  weight: ["300", "400", "500", "700"],
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const theme = createTheme({
   palette: {
-    mode: 'light',
+    mode: "light",
     primary: {
       main: "#39CDCC",
       light: "#39cdcc14",
@@ -49,7 +49,7 @@ const theme = createTheme({
     text: {
       primary: "#545F7D",
       secondary: "#213F7D",
-},
+    },
     action: {
       disabled: "#FFFFFF",
       disabledBackground: "#7EDEDE",
@@ -59,5 +59,4 @@ const theme = createTheme({
     fontFamily: roboto.style.fontFamily,
   },
 });
-
 export default theme;

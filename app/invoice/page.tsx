@@ -13,14 +13,12 @@ import {
   TablePagination,
   Button,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 import api from "../api/api";
-import { useRouter } from "next/navigation";
-import Link from 'next/link'
-
-
-
+import Loading from "@/app/components/Loading";
+import EmptyInvoice from "@/app/components/EmptyInvoice";
 
 type Column = {
   id: string;
@@ -57,7 +55,7 @@ function createData(
   invoiceNumber: number,
   customerName: string,
   createdAt: string,
-  invoiceTotal: number,
+  invoiceTotal: number
 ): Data {
   return {
     invoiceNumber,
@@ -71,10 +69,10 @@ const formatDate = (date: any) => {
   return format(new Date(date), "MMM dd, yyyy h:mm aa");
 };
 
-export default function InvoicePage() {
+const InvoicePage = () => {
   const router = useRouter();
 
-  const [Loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -84,7 +82,7 @@ export default function InvoicePage() {
       item.invoiceNumber,
       item.customerName,
       item.createdAt,
-      item.invoiceTotal,
+      item.invoiceTotal
     )
   );
 
@@ -93,12 +91,8 @@ export default function InvoicePage() {
   };
 
   const handleViewInvoice = (index: number) => {
-    
-    
-    // const pathname = '/invoice/detail'
-    console.log(index)
-    router.push({pathname: '/invoice/detail', data: JSON.stringify( { a: index, b: 'another value'} )});
-
+    localStorage.setItem("invoiceData", JSON.stringify(data[index]));
+    router.push("/invoice/detail");
   };
 
   const handleChangeRowsPerPage = (
@@ -112,10 +106,15 @@ export default function InvoicePage() {
     const getData = async () => {
       try {
         setLoading(true);
-        const response = await api.getUerInvoice();
+        let userId: any;
+        const user = localStorage.getItem("user");
+        if (user) {
+          const userObj = JSON.parse(user);
+          userId = userObj.id;
+        }
+        const response = await api.getUerInvoice(userId);
         if (response.data.isSuccessful) {
           const data = response.data.data;
-          console.log(data);
           setData(data);
           setLoading(false);
         } else toast.error("Error in Getting Data");
@@ -142,103 +141,102 @@ export default function InvoicePage() {
       >
         Invoice List
       </Typography>
-      <Paper sx={{ width: "100%", overflow: "hidden" }}>
-        <TableContainer>
-          <Table sx={{ minWidth: 650 }}>
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    sx={{
-                      p: 2,
-                      borderBottom: "none",
-                      backgroundColor: "primary.light",
-                    }}
-                  >
-                    <Typography
-                      color="secondary"
-                      fontWeight={600}
-                      sx={{ whiteSpace: "nowrap" }}
-                    >
-                      {column.label}
-                    </Typography>
-                  </TableCell>
-                ))}
-                <TableCell
-                sx={{
-                      p: 2,
-                      borderBottom: "none",
-                      backgroundColor: "primary.light",
-                    }}
-                ></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {/* check if table has data */}
-              {data.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6}>No Records Found</TableCell>
-                </TableRow>
-              ) : (
-                rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index: number) => (
-                  <TableRow hover key={index}>
-                     <TableCell sx={{ p: "12px" }}>
-                      <Typography fontWeight={400} sx={{}}>
-                      INV{row.invoiceNumber}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ p: "12px" }}>
-                      <Typography fontWeight={400} sx={{}}>
-                        {row.customerName}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ p: "12px" }}>
-                      <Typography fontWeight={400} sx={{}}>
-                        {formatDate(row.createdAt)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ p: "12px" }}>
-                      <Typography fontWeight={400} sx={{}}>
-                        $ {Number(row.invoiceTotal).toLocaleString()}
-                      </Typography>
-                    </TableCell>
-                   <TableCell>
-                   {/* <Link
-        href={{
-          pathname: '/invoice/detail',
-          state: row
-        }}
-      >
-        View
-      </Link> */}
-                   <Button variant="outlined" onClick={() => handleViewInvoice(index)} >
-                      <Typography
-                      component="p"
-                      fontWeight={400}
-                      color="primary.main"
-                      sx={{ fontSize: "10px" }}
-                    >
-                    VIEW
-                    </Typography>
-                  </Button>
-                    </TableCell>
+      {loading ? (
+        <Loading />
+      ) : data.length === 0 ? (
+        <EmptyInvoice />
+      ) : (
+        <>
+          <Paper sx={{ width: "100%", overflow: "hidden" }}>
+            <TableContainer>
+              <Table sx={{ minWidth: 650 }}>
+                <TableHead>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        sx={{
+                          p: 2,
+                          borderBottom: "none",
+                          backgroundColor: "primary.light",
+                        }}
+                      >
+                        <Typography
+                          color="secondary"
+                          fontWeight={600}
+                          sx={{ whiteSpace: "nowrap" }}
+                        >
+                          {column.label}
+                        </Typography>
+                      </TableCell>
+                    ))}
+                    <TableCell
+                      sx={{
+                        p: 2,
+                        borderBottom: "none",
+                        backgroundColor: "primary.light",
+                      }}
+                    ></TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
+                </TableHead>
+                <TableBody>
+                  {rows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row, index: number) => (
+                      <TableRow hover key={index}>
+                        <TableCell sx={{ p: "12px" }}>
+                          <Typography fontWeight={400} sx={{}}>
+                            INV{row.invoiceNumber}
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ p: "12px" }}>
+                          <Typography fontWeight={400} sx={{}}>
+                            {row.customerName}
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ p: "12px" }}>
+                          <Typography fontWeight={400} sx={{}}>
+                            {formatDate(row.createdAt)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ p: "12px" }}>
+                          <Typography fontWeight={400} sx={{}}>
+                            $ {Number(row.invoiceTotal).toLocaleString()}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outlined"
+                            onClick={() => handleViewInvoice(index)}
+                          >
+                            <Typography
+                              component="p"
+                              fontWeight={400}
+                              color="primary.main"
+                              sx={{ fontSize: "10px" }}
+                            >
+                              VIEW
+                            </Typography>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </Paper>
+        </>
+      )}
     </Box>
   );
-}
+};
+export default InvoicePage;

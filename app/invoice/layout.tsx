@@ -1,12 +1,23 @@
+"use client";
+
 import SideBar from "@/app/components/SideBar"
 import { Box } from "@mui/material"
-
+import { useEffect } from "react"
+import { useRouter } from "next/navigation";
 
 export default function InvoiceLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    if(!localStorage.getItem('user')){
+      router.push('/');
+    }
+   }, []);
+  
   return (
     <Box
         sx={{ display: "flex" }}
