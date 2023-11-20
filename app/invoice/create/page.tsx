@@ -101,7 +101,7 @@ const CreateInvoicePage = () => {
       customerAddress: "",
     },
     validationSchema: validationSchema,
-    onSubmit: async (values, args) => {
+    onSubmit: async (values) => {
       try {
         setLoading(true);
         let userId: any;
@@ -118,12 +118,10 @@ const CreateInvoicePage = () => {
         };
 
         const response = await api.createInvoice(paylaod);
-        console.log(response);
         const message = response.data.message;
         if (response.data.isSuccessful) {
           router.push("/invoice");
           toast.success(message);
-          args.resetForm();
         } else toast.error(message);
       } catch (error: any) {
         setLoading(false);

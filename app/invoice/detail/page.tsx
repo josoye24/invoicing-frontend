@@ -43,6 +43,7 @@ const ViewInvoicePage = () => {
 
   return (
     <Box
+      mb={5}
       sx={{
         display: "flex",
         justifyContent: "center",

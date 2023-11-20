@@ -45,7 +45,6 @@ const SignupPage = () => {
         const response = await api.signUp(values);
         const message = response.data.message
         
-        console.log(response);
         if (response.data.isSuccessful) {
           router.push('/')
           toast.success(message);
@@ -53,7 +52,6 @@ const SignupPage = () => {
         } else toast.error(message);
       } catch (error: any) {
         setLoading(false);
-        console.log(error);
         if (error.response) {
         toast.error(error.response.data.message);
         } else {

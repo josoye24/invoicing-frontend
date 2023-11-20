@@ -40,13 +40,12 @@ const Home = () => {
       password: "",
     },
     validationSchema: validationSchema,
-    onSubmit: async (values, args) => {
+    onSubmit: async (values) => {
       try {
         setLoading(true);
         const response = await api.signIn(values);
         const message = response.data.message;
 
-        console.log(response);
         if (response.data.isSuccessful) {
           const userData = response.data.data.user;
           const token = response.data.data.token;
@@ -54,11 +53,9 @@ const Home = () => {
           localStorage.setItem("token", token);
           router.push("/invoice");
           toast.success(message);
-          args.resetForm();
         } else toast.error(message);
       } catch (error: any) {
         setLoading(false);
-        console.log(error);
         if (error.response) {
           toast.error(error.response.data.message);
         } else {
