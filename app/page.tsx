@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Typography,
   TextField,
@@ -67,6 +67,12 @@ const Home = () => {
       }
     },
   });
+
+  useEffect(() => {
+    if (localStorage.getItem("user")) {
+      router.push("/invoice");
+    }
+  }, []);
 
   return (
     <Box

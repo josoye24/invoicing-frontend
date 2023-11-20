@@ -51,7 +51,7 @@ const CreateInvoicePage = () => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const [invoiceItems, setInvoiceItems] = useState<Product[]>([initialProduct]);
+  const [invoiceItems, setInvoiceItems] = useState<Product[]>([initialProduct] as any);
 
   const handleAddItem = () => {
     setInvoiceItems([...invoiceItems, initialProduct]);
@@ -66,21 +66,26 @@ const CreateInvoicePage = () => {
   const handleItemChange = (
     index: number,
     field: keyof Product,
-    value: string | number
+    value: any
   ) => {
+  
     const updatedItems = [...invoiceItems];
     const currentItem = { ...updatedItems[index] };
 
     if (typeof currentItem[field] === "string" && typeof value === "string") {
-      currentItem[field] = value;
+      (currentItem[field] as any) = value;
+
     } else if (
       typeof currentItem[field] === "number" &&
       typeof value === "number"
     ) {
-      currentItem[field] = value;
+      (currentItem[field] as any) = value;
+
       currentItem.amount =
         currentItem.productQuantity * currentItem.productPricePerUnit;
     }
+
+
 
     updatedItems[index] = currentItem;
     setInvoiceItems(updatedItems);
@@ -99,9 +104,16 @@ const CreateInvoicePage = () => {
     onSubmit: async (values, args) => {
       try {
         setLoading(true);
+        let userId: any;
+        const user = localStorage.getItem("user");
+        if (user) {
+          const userObj = JSON.parse(user);
+          userId = userObj.id;
+        }
+
         const paylaod = {
           ...values,
-          userId: "7d49f065-40f0-4f88-920b-2fed7965be23",
+          userId: userId,
           details: invoiceItems,
         };
 
